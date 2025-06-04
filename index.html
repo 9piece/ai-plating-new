@@ -6,8 +6,8 @@
   <title>AI 摆盘图生成</title>
   <style>
     body {
-      font-family: "Helvetica Neue", sans-serif;
-      background: linear-gradient(135deg, #fff0f0, #fffce0);
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to bottom right, #fff1e0, #fff5cc);
       margin: 0;
       padding: 2rem;
       display: flex;
@@ -15,71 +15,93 @@
       align-items: center;
       color: #333;
     }
+
     h1 {
       font-size: 2.5rem;
-      margin-bottom: 2rem;
-    }
-    input[type="text"] {
-      padding: 1rem;
-      width: 300px;
-      font-size: 1rem;
-      border: 2px solid #ffa500;
-      border-radius: 8px;
       margin-bottom: 1.5rem;
     }
+
+    input[type="text"] {
+      padding: 1rem;
+      width: 400px;
+      font-size: 1.2rem;
+      border-radius: 10px;
+      border: 2px solid #ffa500;
+      margin-bottom: 1rem;
+    }
+
     button {
-      padding: 0.8rem 1.5rem;
-      background-color: #ff4c4c;
+      background-color: #ff4d4f;
       color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 2rem;
+    }
+
+    button:hover {
+      background-color: #e43e3e;
+    }
+
+    .styles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .style-btn {
+      background-color: #fbbd08;
+      color: #222;
+      border: 2px solid #ffa500;
+      padding: 0.7rem 1.2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .style-btn:hover {
+      background-color: #f6a400;
+    }
+
+    .result {
+      text-align: center;
+    }
+
+    img {
+      max-width: 80%;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      margin-top: 1rem;
+    }
+
+    .download-btn {
+      margin-top: 1rem;
+      background-color: #ff9800;
+      color: white;
+      padding: 0.5rem 1.5rem;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
-    button:hover {
-      background-color: #e63900;
-    }
-    .recommend {
-      margin-top: 2rem;
-    }
-    .style-btn {
-      padding: 0.6rem 1.2rem;
-      margin: 0.4rem;
-      border: 2px solid #ffa500;
-      background-color: #fff8e1;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    .style-btn:hover {
-      background-color: #ffe066;
-    }
-    #result {
-      margin-top: 2rem;
-      text-align: center;
-    }
-    #preview {
+
+    .rating {
       margin-top: 1rem;
-      max-width: 90%;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    #download-btn {
-      margin-top: 1rem;
-      display: none;
-      background-color: #ffb400;
+      font-size: 1.2rem;
+      color: #ff4d4f;
     }
   </style>
 </head>
 <body>
-  <h1>🍽️ AI 摆盘图生成</h1>
+  <h1>🍽️AI 摆盘图生成</h1>
   <input type="text" id="prompt" placeholder="如 红烧牛肉+中式禅意" />
-  <br />
   <button onclick="generateImage()">生成图像</button>
 
-  <div class="recommend">
-    <p>推荐风格：</p>
+  <div class="styles">
     <button class="style-btn" onclick="setStyle('日式极简')">日式极简</button>
     <button class="style-btn" onclick="setStyle('中式禅意')">中式禅意</button>
     <button class="style-btn" onclick="setStyle('未来主义')">未来主义</button>
@@ -87,53 +109,39 @@
     <button class="style-btn" onclick="setStyle('分子料理')">分子料理</button>
   </div>
 
-  <div id="result">
-    <p id="status"></p>
-    <img id="preview" src="" alt="" />
-    <br />
-    <button id="download-btn" onclick="downloadImage()">下载图片</button>
-  </div>
+  <div class="result" id="result"></div>
 
   <script>
     async function generateImage() {
-      const prompt = document.getElementById("prompt").value;
-      const status = document.getElementById("status");
-      const preview = document.getElementById("preview");
-      const downloadBtn = document.getElementById("download-btn");
+      const prompt = document.getElementById('prompt').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '生成中...';
 
-      status.textContent = "生成中...";
-      preview.src = "";
-      downloadBtn.style.display = "none";
-
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ prompt })
       });
 
       const data = await response.json();
-
-      if (response.ok) {
-        preview.src = data.image;
-        downloadBtn.style.display = "inline-block";
-        status.textContent = "生成完成：";
+      if (data.image) {
+        resultDiv.innerHTML = `
+          <img src="${data.image}" alt="生成图像" />
+          <br />
+          <a class="download-btn" href="${data.image}" download>下载图片</a>
+          <div class="rating">AI 推荐评分：⭐⭐⭐⭐☆</div>
+        `;
       } else {
-        status.textContent = "生成失败：" + (data.error || "未知错误");
+        resultDiv.innerHTML = '生成失败：' + data.error;
       }
     }
 
-    function downloadImage() {
-      const image = document.getElementById("preview");
-      const link = document.createElement("a");
-      link.href = image.src;
-      link.download = "plating-image.png";
-      link.click();
-    }
-
     function setStyle(style) {
-      const input = document.getElementById("prompt");
+      const input = document.getElementById('prompt');
       if (!input.value.includes(style)) {
-        input.value = input.value + (input.value ? "+" : "") + style;
+        input.value += (input.value ? '+' : '') + style;
       }
     }
   </script>
