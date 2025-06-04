@@ -11,7 +11,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_API_KEY"  // <<< 替换为你的豆包API密钥
+        "Authorization": "Bearer 0bce1539-21ee-486d-acdd-95ecc559e984"  // 
       },
       body: JSON.stringify({
         endpoint_id: "ep-20250603194600-lxnmn",
