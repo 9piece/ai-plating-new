@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 摆盘图生成</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    input, button, select {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .image-preview {
+      margin-top: 1.5rem;
+    }
+    .rating {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: #f39c12;
+    }
+    .download {
+      margin-top: 1rem;
+    }
+    .styles {
+      margin-top: 2rem;
+    }
+    .styles button {
+      margin: 0.25rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍽️ AI 摆盘图生成</h1>
+
+  <label>
+    请输入菜名 + 风格描述：
+    <input type="text" id="prompt" placeholder="如 红烧牛肉+中式禅意" />
+  </label>
+
+  <button onclick="generateImage()">生成图像</button>
+
+  <div class="styles">
+    <p>推荐风格：</p>
+    <button onclick="useStyle('红烧牛肉+日式极简')">日式极简</button>
+    <button onclick="useStyle('红烧牛肉+中式禅意')">中式禅意</button>
+    <button onclick="useStyle('红烧牛肉+未来主义')">未来主义</button>
+    <button onclick="useStyle('红烧牛肉+艺术装置风')">艺术装置风</button>
+    <button onclick="useStyle('红烧牛肉+分子料理')">分子料理</button>
+  </div>
+
+  <div class="image-preview" id="imagePreview"></div>
+  <div class="rating" id="rating"></div>
+  <div class="download" id="download"></div>
+
+  <script>
+    function useStyle(stylePrompt) {
+      document.getElementById('prompt').value = stylePrompt;
+    }
+
+    async function generateImage() {
+      const prompt = document.getElementById('prompt').value;
+      const preview = document.getElementById('imagePreview');
+      const rating = document.getElementById('rating');
+      const download = document.getElementById('download');
+      preview.innerHTML = '生成中...';
+      rating.innerHTML = '';
+      download.innerHTML = '';
+
+      try {
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+
+        const data = await response.json();
+        if (data.image) {
+          preview.innerHTML = `<img src="${data.image}" alt="生成图片" width="512" />`;
+          rating.innerHTML = 'AI 评分：⭐⭐⭐⭐';
+          download.innerHTML = `<a href="${data.image}" download>⬇️ 下载图像</a>`;
+        } else {
+          preview.innerHTML = '生成失败，请重试';
+        }
+      } catch (err) {
+        preview.innerHTML = '发生错误';
+      }
+    }
+  </script>
+</body>
+</html>
